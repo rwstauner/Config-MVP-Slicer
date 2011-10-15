@@ -108,6 +108,7 @@ sub slice {
   my $config = $self->config;
   my $regexp = $self->regexp;
 
+  # sort to keep the bracket subscripts in order
   foreach my $key ( sort keys %$config ){
     next unless
       my ($plug, $attr, $array) = ($key =~ $regexp);
@@ -280,3 +281,4 @@ with one line.
 
 # TODO: document Plugin.value[0], Plugin.value[1] to work around inability to declare
 # all possible values in mvp_multivalue_args
+# "since sorting numerically probably isn't going to do what you want"
