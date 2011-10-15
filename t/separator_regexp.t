@@ -64,4 +64,11 @@ is_deeply
   [qw(-Class::Name attr.ibute), undef],
   'regexp prefix followed by class name with string prefix';
 
+$regexp = new_ok($mod, [{separator => '(.+?)\W+(\w+)'}])->separator_regexp;
+
+is_deeply
+  [  'Class::Name->attr' =~ $regexp],
+  [qw(Class::Name attr), undef],
+  'alternate separator';
+
 done_testing;
