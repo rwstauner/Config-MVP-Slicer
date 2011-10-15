@@ -8,6 +8,11 @@ eval "require $mod" or die $@;
 my $regexp = new_ok($mod)->separator_regexp;
 
 is_deeply
+  ['goober' =~ $regexp],
+  [],
+  'not matched';
+
+is_deeply
   [  'Class::Name.attr' =~ $regexp],
   [qw(Class::Name attr), undef],
   'simple name.attr match';
