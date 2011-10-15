@@ -53,19 +53,19 @@ The default separates plugin name from attribute name with a dot.
 has separator => (
   is       => 'ro',
   isa      => 'Str',
-  # "Module::Name.attribute" "-Plugin/variable"
+  # "Module::Name.attribute" "-Plugin.variable"
   default  => '(.+?)\.(.+?)',
 );
 
-=method regexp
+=method separator_regexp
 
 Returns a compiled regular expression (C<qr//>)
 combining L</prefix>, L</separator>,
-and the ending array specification (C<\[.*?\]>).
+and the possible trailing array specification (C<\[.*?\]>).
 
 =cut
 
-sub regexp {
+sub separator_regexp {
   my ($self) = @_;
   return qr/^${\ $self->prefix }${\ $self->separator }(\[.*?\])?$/;
 }
@@ -106,7 +106,7 @@ sub slice {
 
   my $slice = {};
   my $config = $self->config;
-  my $regexp = $self->regexp;
+  my $regexp = $self->separator_regexp;
 
   # sort to keep the bracket subscripts in order
   foreach my $key ( sort keys %$config ){
