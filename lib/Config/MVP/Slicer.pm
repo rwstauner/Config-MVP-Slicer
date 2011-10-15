@@ -46,14 +46,16 @@ A regular expression that will capture
 the package name in C<$1> and
 the attribute name in C<$2>.
 
-The default separates plugin name from attribute name with a dot.
+The default separates plugin name from attribute name with a dot:
+
+  'Module::Name.attribute'
+  '-Plugin.attr'
 
 =cut
 
 has separator => (
   is       => 'ro',
   isa      => 'Str',
-  # "Module::Name.attribute" "-Plugin.variable"
   default  => '(.+?)\.(.+?)',
 );
 
