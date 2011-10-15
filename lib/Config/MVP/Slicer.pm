@@ -121,7 +121,7 @@ sub slice {
 
     # TODO: should we allow for clearing previous []? $slice->{$attr} = [] if $overwrite;
 
-    # TODO: $array || ref($prev->{$attr}) eq 'ARRAY'
+    # TODO: $array || ref($prev->{$attr}) eq 'ARRAY'; # or is this handled by merge?
     $self->_update_hash($slice, $attr, $value, {array => $array});
   }
   return $slice;
@@ -134,11 +134,14 @@ sub slice {
 Get the config slice (see L</slice>),
 then attempt to merge it into the plugin.
 
-This require the plugin's attributes to be writable (C<'rw'>).
+If C<$plugin> is an arrayref the hashref will be modified.
+If it is an object it's attributes should be writable (C<'rw'>).
 
-It will attempt to push onto array references and
-concatenate onto existing strings (joined by a space).
-It will overwrite any other types.
+This will append to array references
+if it was specified as an array
+or if a pre-existing value is an arrayref.
+
+Returns the modified C<$plugin> for convenience.
 
 Possible options:
 
@@ -148,6 +151,7 @@ Possible options:
 =cut
 
 #* C<join> - A string that will be used to join a new value to any existing value instead of overwriting.
+# TODO: allow option for reaching into blessed hashref?
 
 sub merge {
   my ($self, $plugin, $opts) = @_;
@@ -194,6 +198,7 @@ sub merge {
       }
     }
   }
+  return $plugin;
 }
 
 
