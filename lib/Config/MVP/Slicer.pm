@@ -98,8 +98,8 @@ Passing a plugin instance of C<'APlug'> would return:
 =cut
 
 sub slice {
-  my ($self, $spec) = @_;
-  my ($name, $class, $prev) = $self->spec($spec);
+  my ($self, $plugin) = @_;
+  my ($name, $class, $prev) = $self->plugin_info($plugin);
 
 # TODO: do we need to do anything to handle mvp_aliases?
 # TODO: can/should we check $class->mvp_multivalue_args rather than if ref $value eq 'ARRAY'
@@ -152,7 +152,7 @@ sub merge {
   $opts ||= {};
 
   my $slice = $opts->{slice} || $self->slice($plugin);
-  my ($name, $class, $conf) = $self->spec($plugin);
+  my ($name, $class, $conf) = $self->plugin_info($plugin);
 
   while( my ($key, $value) = each %$slice ){
     # merge into hashref
@@ -194,7 +194,23 @@ sub merge {
   }
 }
 
-sub spec {
+
+=method plugin_info
+
+  $slicer->plugin_info($plugin);
+
+Used by other methods to normalize the information about a plugin.
+Returns a list of C<< ($name, $package, \%config) >>.
+
+If C<$plugin> is an arrayref it will simply dereference it.
+
+If C<$plugin> is an instance of a plugin that has a C<plugin_name>
+method it will contstruct the list from that method, C<ref>,
+and the instance itself.
+
+=cut
+
+sub plugin_info {
   my ($self, $spec) = @_;
 
   # TODO: what should we do when name = "@Bundle/Plugin"? What adds that prefix?
