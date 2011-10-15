@@ -42,4 +42,21 @@ is_deeply
   [qw(-Class::Name attr), undef],
   'plugin class has string prefix';
 
+$regexp = new_ok($mod, [{prefix => 'slice.'}])->separator_regexp;
+
+is_deeply
+  [  'slice.Class::Name.attr.ibute' =~ $regexp],
+  [qw(Class::Name attr.ibute), undef],
+  'prefix has a dot';
+
+is_deeply
+  [  'sliceXClass::Name.attr.ibute' =~ $regexp],
+  [qw(Class::Name attr.ibute), undef],
+  'prefix is a regexp';
+
+is_deeply
+  [  'sliceX-Class::Name.attr.ibute' =~ $regexp],
+  [qw(-Class::Name attr.ibute), undef],
+  'regexp prefix followed by class name with string prefix';
+
 done_testing;

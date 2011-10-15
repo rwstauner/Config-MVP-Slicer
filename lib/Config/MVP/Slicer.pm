@@ -24,13 +24,13 @@ has config => (
 
 =attr prefix
 
-String that should match at the beginning of a key
+Regular expression that should match at the beginning of a key
 before the module name and attribute:
 
-  # prefix => 'dynamic.'
+  # prefix => 'dynamic\.'
   # { 'dynamic.Module::Name.attr' => 'value' }
 
-Default prefix is the empty string C<''>.
+Default is no prefix (empty string C<''>).
 
 =cut
 
