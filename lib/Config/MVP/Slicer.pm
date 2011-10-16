@@ -181,6 +181,10 @@ sub merge {
         if( ref $previous eq 'ARRAY' ){
           push(@$previous, ref $value eq 'ARRAY' ? @$value : $value);
         }
+        # if new value was specified as arrayref, attempt to merge
+        elsif( ref $value eq 'ARRAY' ){
+          $plugin->$key( [ $previous, @$value ] );
+        }
         # is this useful?
         elsif( $type->name eq 'Str' && $opts->{join} ){
           $plugin->$key( join($opts->{join}, $previous, $value) );

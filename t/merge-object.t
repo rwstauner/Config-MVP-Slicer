@@ -67,8 +67,18 @@ is_deeply
   'set as arrayref when specified as []';
 
 is_deeply
+  $slicer->merge(X::Moose->new({name => Moose => and => 'cow'})),
+  X::Moose->new({name => Moose => and => [qw(cow squirrel)] }),
+  'convert previous string to array ref when specified as []';
+
+is_deeply
   $slicer->merge(X::Moose->new({name => BigMoose => and => ['cow']})),
   X::Moose->new({name => BigMoose => and => ['cow', 'little squirrel'] }),
   'merged array ref when previous value was arrayref';
+
+is_deeply
+  $slicer->merge(X::Moose->new({name => BigMoose => and => 'mouse' })),
+  X::Moose->new({name => BigMoose => and => 'little squirrel'}),
+  'overwrite when neither is arrayref';
 
 done_testing;
