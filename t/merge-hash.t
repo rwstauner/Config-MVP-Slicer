@@ -64,4 +64,16 @@ is_deeply
   { attr => 'pa' },
   'overwrite when neither is arrayref';
 
+is_deeply
+  $slicer->merge([Plug => 'X::Plug' => { attr => 'ibute' }],
+    {slice => {attr => 'x'}})->[2],
+  { attr => 'x' },
+  'overwrite with passed in slice';
+
+is_deeply
+  $slicer->merge([Hunting2 => 'X::Hunting' => { -shot => 'gun', season => ['looney'] }],
+    {slice => {season => [qw(tunes party)]}})->[2],
+  { -shot => 'gun', season => [qw(looney tunes party)] },
+  'merge arrayref with passed in slice';
+
 done_testing;
