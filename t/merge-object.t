@@ -21,6 +21,7 @@ my $slicer = new_ok($mod, [{
     'Hunting2.season[1.08]' => 'wabbit',
     'Hunting2.season[1.11]' => 'duck',
     'Hunting2.season[z]' => 'zombie',
+    'Hunting3.season' => 'fudd',
   },
 }]);
 
@@ -80,5 +81,25 @@ is_deeply
   $slicer->merge(X::Moose->new({name => BigMoose => and => 'mouse' })),
   X::Moose->new({name => BigMoose => and => 'little squirrel'}),
   'overwrite when neither is arrayref';
+
+is_deeply
+  $slicer->merge(X::Hunting->new({name => Hunting => -shot => 'gun', season => ['looney'] })),
+  X::Hunting->new({name => Hunting => -shot => 'gun', season => [qw(looney duck wabbit fudd)] }),
+  'merge array ref';
+
+is_deeply
+  $slicer->merge(X::Hunting->new({name => Hunting2 => -shot => 'gun', season => ['looney'] })),
+  X::Hunting->new({name => Hunting2 => -shot => 'gun', season => [qw(looney wabbit bunny bird duck zombie)] }),
+  'merged arrayref in order';
+
+is_deeply
+  $slicer->merge(X::Hunting->new({name => 'Hunting3'})),
+  X::Hunting->new({name => Hunting3 => season => ['fudd'] }),
+  'assigned as arrayref because attribute is typed as such';
+
+is_deeply
+  $slicer->merge(X::Plug->new({ name => Plug => attr => 'ibute' })),
+  X::Plug->new({ name => Plug => attr => 'pa' }),
+  'overwrite Str attribute';
 
 done_testing;
