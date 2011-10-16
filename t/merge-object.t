@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More 0.96;
+use Test::Fatal;
 
 my $mod = 'Config::MVP::Slicer';
 eval "require $mod" or die $@;
@@ -22,6 +23,7 @@ my $slicer = new_ok($mod, [{
     'Hunting2.season[1.11]' => 'duck',
     'Hunting2.season[z]' => 'zombie',
     'Hunting3.season' => 'fudd',
+    'BadPlug.foo'       => 'bar',
   },
 }]);
 
@@ -101,5 +103,10 @@ is_deeply
   $slicer->merge(X::Plug->new({ name => Plug => attr => 'ibute' })),
   X::Plug->new({ name => Plug => attr => 'pa' }),
   'overwrite Str attribute';
+
+like
+  exception { $slicer->merge(X::Plug->new({name => 'BadPlug'})) },
+  qr/not found/,
+  'croaked on invalid attribute';
 
 done_testing;
