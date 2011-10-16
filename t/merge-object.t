@@ -11,6 +11,7 @@ my $slicer = new_ok($mod, [{
     'Plug.attr'         => 'pa',
     'Mod::Name.opt'     => 'val',
     'Moose.and[]'       => 'squirrel',
+    'BigMoose.and'      => 'little squirrel',
     'Hunting.season[0]' => 'duck',
     'Hunting.season[1]' => 'wabbit',
     'Hunting.season[9]' => 'fudd',
@@ -34,6 +35,7 @@ foreach my $spec (
   [qw( X::Plug    attr   Str )],
   [qw( Mod::Name  opt    Str )],
   [qw( X::Hunting season ArrayRef[Str] )],
+  [qw( X::Moose   and    Any )],
 ){
   my ($pack, $attr, $type) = @$spec;
   eval "{ package $pack; use Moose;" .
@@ -58,5 +60,15 @@ is_deeply
   $previous,
   $exp,
   'merge modifies object';
+
+is_deeply
+  $slicer->merge(X::Moose->new({name => 'Moose'})),
+  X::Moose->new({name => Moose => and => [qw(squirrel)] }),
+  'set as arrayref when specified as []';
+
+is_deeply
+  $slicer->merge(X::Moose->new({name => BigMoose => and => ['cow']})),
+  X::Moose->new({name => BigMoose => and => ['cow', 'little squirrel'] }),
+  'merged array ref when previous value was arrayref';
 
 done_testing;

@@ -179,7 +179,7 @@ sub merge {
       if( $previous ){
         # FIXME: do we need to check blessed() and/or isa()?
         if( ref $previous eq 'ARRAY' ){
-          push(@$previous, $value);
+          push(@$previous, ref $value eq 'ARRAY' ? @$value : $value);
         }
         # is this useful?
         elsif( $type->name eq 'Str' && $opts->{join} ){
