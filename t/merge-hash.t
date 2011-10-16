@@ -50,6 +50,11 @@ is_deeply
   'convert previous string to array ref as specified';
 
 is_deeply
+  $slicer->merge([Hunting2 => 'X::Hunting' => { -shot => 'gun', season => ['looney'] }])->[2],
+  { -shot => 'gun', season => [qw(looney wabbit bunny bird duck zombie)] },
+  'merge arrayref in order';
+
+is_deeply
   $slicer->merge([Plug => 'X::Plug' => { attr => [qw(ibute)] }])->[2],
   { attr => [qw(ibute pa)] },
   'merged array ref when previous value was arrayref';

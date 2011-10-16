@@ -19,6 +19,7 @@ my $slicer = new_ok($mod, [{
     'Hunting2.season[1.10]' => 'bird',
     'Hunting2.season[1.08]' => 'wabbit',
     'Hunting2.season[1.11]' => 'duck',
+    'Hunting2.season[z]' => 'zombie',
   },
 }]);
 
@@ -47,7 +48,7 @@ is_deeply
 
 is_deeply
   $slicer->slice([Hunting2 => 'X::Hunting' => {}]),
-  { season => [qw(wabbit bunny bird duck)] },
+  { season => [qw(wabbit bunny bird duck zombie)] },
   'received array ref containing all items';
 
 done_testing;
