@@ -397,8 +397,64 @@ Also see L<Dist::Zilla::Role::PluginBundle::EmebeddedConfig>
 to enable this functionality automatically in your bundle
 with one line.
 
-=cut
+=head1 CONFIGURATION SYNTAX
 
-# TODO: document Plugin.value[0], Plugin.value[1] to work around inability to declare
-# all possible values in mvp_multivalue_args
-# "since sorting numerically probably isn't going to do what you want"
+Often configurations come from an ini file and look like this:
+
+  [PluginName]
+  option = value
+
+This gets converted to a hashref:
+
+  PluginName->new({ option => 'value' });
+
+To embed configuration for other plugins:
+
+  [@BigBundle]
+  bundle_option = value
+  Bundled::Plugin.option = other value
+
+The simple 'bundle_option' attribute is for C<@BigBundle>,
+and the bundle can slice out the C<Bundled::Plugin> configuration
+and merge it in.
+
+Prefixes can be used (see L</prefix>).
+In this example the prefix is set as C<"plug.">.
+
+  [@Foo]
+  plug.Bundled::Plugin.attr = value
+
+Due to limitations of this dynamic passing of unknown options
+(otherwise known as a hack)
+values that are arrays cannot be declared ahead of time by the bundle.
+You can help out by specifying that an attribute should be an array:
+
+  [@Bar]
+  Baz.quux[0] = part 1
+  Baz.quux[1] = part 2
+
+The subscripts inside the brackets are used for sorting but otherwise ignored.
+This is required because each line will end up in a hashref:
+
+  { "quux[0]" => "part 1", "quxx[1]" => part 2 }
+
+The L</slice> method will sort the keys (B<alphabetically>) to produce:
+
+  { quux => ["part 1", "part 2"] }
+
+For simplicity the keys are sorted B<alphabetically>
+because C<quux[1.9]> and C<quux[1.10]>
+probably won't sort the way you intended anyway,
+so just keep things simple:
+
+  [@Bundle]
+  Plug.attr[0] = part 1
+  Plug.attr[1] = part 2
+  Plug.other[09] = part 1
+  Plug.other[10] = part 2
+  Plug.alpha[a] = part 1
+  Plug.alpha[b] = part 2
+  Plug.alpha[bc] = part 3
+  Plug.single[] = subscript not required; only used for sorting
+
+=cut
