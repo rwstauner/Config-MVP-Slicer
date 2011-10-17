@@ -32,7 +32,13 @@ It will receive two arguments:
 * The plugin name portion of the configuration line
 * The name of the plugin being worked on (provided to L</slice>, for instance).
 
-The default returns true if the two values are equal and false otherwise.
+The default returns true if the current plugin name matches
+the name from the config line
+regardless of any leading "@Bundle/" prefixes in the plugin name.
+
+Obviously if the "@Bundle/" prefix is specified in the configuration
+then it is required to be there for the default sub to match
+(but multiple other "@Bundle/" prefixes will be allowed before it).
 
 =cut
 
@@ -41,7 +47,8 @@ has match_name => (
   isa      => 'CodeRef',
   traits   => ['Code'],
   default  => sub {
-    sub { $_[0] eq $_[1] }
+    # "@Bundle/Plugin" =~ "(@Bundle/)*Plugin"
+    sub { scalar $_[1] =~ m{^(@.+?/)*?\Q$_[0]\E$} }
   },
   handles => {
     match_name => 'execute',
