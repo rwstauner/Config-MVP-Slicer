@@ -20,7 +20,55 @@ has config => (
   isa      => 'HashRef',
 );
 
-# TODO: what's the moose way of accepting a callback? has match => isa => 'CodeRef'; $self->match->(@args); ?
+=attr match_name
+
+This is coderef that determines if a configuration line
+matches a plugin's name.
+
+It can be customized by passing in an alternate subroutine reference.
+It will receive two arguments:
+
+=for :list
+* The plugin name portion of the configuration line
+* The name of the plugin being worked on (provided to L</slice>, for instance).
+
+The default returns true if the two values are equal and false otherwise.
+
+=cut
+
+has match_name => (
+  is       => 'bare',
+  isa      => 'CodeRef',
+  traits   => ['Code'],
+  default  => sub {
+    sub { $_[0] eq $_[1] }
+  },
+  handles => {
+    match_name => 'execute',
+  },
+);
+
+=attr match_package
+
+This works just like L</match_name>
+except that the configuration line is compared
+to the plugin's package (class).
+
+The default returns true if the two values are equal and false otherwise.
+
+=cut
+
+has match_package => (
+  is       => 'bare',
+  isa      => 'CodeRef',
+  traits   => ['Code'],
+  default  => sub {
+    sub { $_[0] eq $_[1] }
+  },
+  handles => {
+    match_package => 'execute',
+  },
+);
 
 =attr prefix
 
@@ -101,10 +149,11 @@ Passing a plugin instance of C<'APlug'> would return:
 
 sub slice {
   my ($self, $plugin) = @_;
-  my ($name, $class, $prev) = $self->plugin_info($plugin);
+  # ignore previous config
+  my ($name, $pack) = $self->plugin_info($plugin);
 
 # TODO: do we need to do anything to handle mvp_aliases?
-# TODO: can/should we check $class->mvp_multivalue_args rather than if ref $value eq 'ARRAY'
+# TODO: can/should we check $pack->mvp_multivalue_args rather than if ref $value eq 'ARRAY'
 
   my $slice = {};
   my $config = $self->config;
@@ -116,8 +165,9 @@ sub slice {
       my ($plug, $attr, $array) = ($key =~ $regexp);
     my $value = $config->{ $key };
 
-    # TODO: $self->match_name($plug, $name) || $self->match_package($plug, $class)
-    next unless $plug eq $name || $plug eq $class;
+    next unless
+      $self->match_name($plug, $name) ||
+      $self->match_package($plug, $pack);
 
     # TODO: should we allow for clearing previous []? $slice->{$attr} = [] if $overwrite;
 
