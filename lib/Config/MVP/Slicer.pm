@@ -189,7 +189,7 @@ If it is an object it's attributes should be writable (C<'rw'>).
 
 This will append to array references
 if it was specified as an array
-or if a pre-existing value is an arrayref.
+or if a preexisting value is an arrayref.
 
 Returns the modified C<$plugin> for convenience.
 
@@ -221,7 +221,7 @@ sub merge {
       my $attr = $plugin->meta->find_attribute_by_name($key);
       if( !$attr ){
         # TODO: should we be dying here?
-        Carp::croak("Attribute '$key' not found on $name\n");
+        Carp::croak("Attribute '$key' not found on $name/$class\n");
         next;
       }
       my $type = $attr->type_constraint;
@@ -266,7 +266,7 @@ Returns a list of C<< ($name, $package, \%config) >>.
 If C<$plugin> is an arrayref it will simply dereference it.
 
 If C<$plugin> is an instance of a plugin that has a C<plugin_name>
-method it will contstruct the list from that method, C<ref>,
+method it will construct the list from that method, C<ref>,
 and the instance itself.
 
 =cut
@@ -319,7 +319,7 @@ no Moose;
 1;
 
 =for test_synopsis
-my ($parent);
+my ($parent, $plugin);
 
 =head1 SYNOPSIS
 
@@ -335,13 +335,13 @@ This can be used to separate embedded configurations for other plugins
 out of larger (parent) configurations.
 
 A prime example of this would be
-L<Dist::Zilla  PluginBundles|Dist::Zilla::Role::PluginBundle>.
+L<Dist::Zilla Plugin Bundles|Dist::Zilla::Role::PluginBundle>.
 
 A bundle loads other plugins with a default configuration
 that works most of the time, but sometimes you wish you could
 customize the configuration for one of those plugins
 without having the remove the plugin from the bundle
-and re-specifiy it separately.
+and re-specify it separately.
 
   # dist.ini
   [@MyBundle]
