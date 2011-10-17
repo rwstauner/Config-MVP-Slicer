@@ -306,15 +306,11 @@ and the instance itself.
 sub plugin_info {
   my ($self, $spec) = @_;
 
-  # TODO: what should we do when name = "@Bundle/Plugin"? What adds that prefix?
-
-  # Dist::Zilla::Role::PluginBundle: ['name', 'class', {con => 'fig'}]
-  # TODO: accept a coderef for expanding the package name
+  # plugin bundles: ['name', 'class', {con => 'fig'}]
   return @$spec
     if ref $spec eq 'ARRAY';
 
-  # Dist::Zilla::Role::Plugin
-  # Pod::Weaver::Role::Plugin
+  # plugin instances
   return ($spec->plugin_name, ref($spec), $spec)
     if eval { $spec->can('plugin_name') };
 
@@ -377,8 +373,8 @@ my ($parent, $plugin);
 This can be used to extract embedded configurations for other plugins
 out of larger (parent) configurations.
 
-A prime example of this would be
-L<Dist::Zilla Plugin Bundles|Dist::Zilla::Role::PluginBundle>.
+A example where this can be useful is plugin bundles
+(see L<Config::MVP::Assembler::WithBundles>).
 
 A bundle loads other plugins with a default configuration
 that works most of the time, but sometimes you wish you could
@@ -386,16 +382,12 @@ customize the configuration for one of those plugins
 without having to remove the plugin from the bundle
 and re-specify it separately.
 
-  # dist.ini
+  # mvp config file
   [@MyBundle]
-  Other::Plugin.heart = dist-zilla
+  Other::Plugin.setting = new value
 
 Now you can accept customizations to plugins into your
-config and separate them out using this.
-
-Also see L<Dist::Zilla::Role::PluginBundle::EmebeddedConfig>
-to enable this functionality automatically in your bundle
-with one line.
+bundle config and separate them out using this module.
 
 =head1 CONFIGURATION SYNTAX
 
@@ -425,7 +417,7 @@ In this example the prefix is set as C<"plug.">.
   plug.Bundled::Plugin.attr = value
 
 Due to limitations of this dynamic passing of unknown options
-(otherwise known as a hack)
+(otherwise known as a I<hack>)
 values that are arrays cannot be declared ahead of time by the bundle.
 You can help out by specifying that an attribute should be an array:
 
