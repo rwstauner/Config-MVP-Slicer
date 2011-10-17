@@ -25,8 +25,10 @@ has config => (
 This is coderef that determines if a configuration line
 matches a plugin's name.
 
-It can be customized by passing in an alternate subroutine reference.
-It will receive two arguments:
+It can be customized by passing an alternate subroutine reference
+to the constructor.
+
+The sub will receive two arguments:
 
 =for :list
 * The plugin name portion of the configuration line
@@ -34,11 +36,25 @@ It will receive two arguments:
 
 The default returns true if the current plugin name matches
 the name from the config line
-regardless of any leading "@Bundle/" prefixes in the plugin name.
+regardless of any leading "@Bundle/" prefixes in the plugin name
+(as this is a common convention for bundles).
 
 Obviously if the "@Bundle/" prefix is specified in the configuration
 then it is required to be there for the default sub to match
 (but multiple other "@Bundle/" prefixes will be allowed before it).
+
+  # configuration line: "Foo.attr = value"
+
+  $slicer->match_name("Foo", "Foo");            # true
+  $slicer->match_name("Foo", "@Bar/Foo");       # true
+  $slicer->match_name("Foo", "Bar");            # false
+
+  # configuration line: "@B/Foo.attr = value"
+
+  $slicer->match_name("@Bar/Foo", "Foo");           # false
+  $slicer->match_name("@Bar/Foo", "@Bar/Foo");      # true
+  $slicer->match_name("@Bar/Foo", "@Baz/@Bar/Foo"); # true
+  $slicer->match_name("@Bar/Foo", "@Baz/Foo");      # false
 
 =cut
 

@@ -34,12 +34,16 @@ my $slicer = new_slicer(); # default
 
 ok $slicer->match_name(qw(Foo      Foo)),           'simple match';
 ok $slicer->match_name(qw(Foo      @Bar/Foo)),      'match with @Bundle/ prefix';
-ok $slicer->match_name(qw(Foo      @Baz/@Bar/Foo)), 'match with multiple @Bundle/ prefixes';
-ok $slicer->match_name(qw(@Bar/Foo @Baz/@Bar/Foo)), 'match with multiple @Bundle/ prefixes on each';
-ok $slicer->match_name(qw(@Bar/Foo @Bar/Foo)),      'match with single @Bundle/ prefix on each';
+ok!$slicer->match_name(qw(Foo      Bar)),           'no match';
 
-ok !$slicer->match_name(qw(@Bar/Foo Foo)),          'no match with when @Bundle/ prefix is specified but not found';
-ok !$slicer->match_name(qw(Foo F.+)),               'not a regexp';
+ok $slicer->match_name(qw(Foo      @Baz/@Bar/Foo)), 'match with multiple @Bundle/ prefixes';
+
+ok!$slicer->match_name(qw(@Bar/Foo Foo)),           'no match when @Bundle/ prefix is specified but not found';
+ok $slicer->match_name(qw(@Bar/Foo @Bar/Foo)),      'match with single @Bundle/ prefix on each';
+ok $slicer->match_name(qw(@Bar/Foo @Baz/@Bar/Foo)), 'match with multiple @Bundle/ prefixes on each';
+ok!$slicer->match_name(qw(@Bar/Foo @Baz/Foo)),      'no match with different @Bundle/ prefixes';
+
+ok!$slicer->match_name(qw(Foo F.+)),                'not a regexp';
 
 is_deeply
   $slicer->slice([Plug => 'X::Plug' => {}]),
