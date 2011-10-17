@@ -73,7 +73,7 @@ has match_name => (
 
 =attr match_package
 
-This works just like L</match_name>
+This works like L</match_name>
 except that the configuration line is compared
 to the plugin's package (class).
 
@@ -167,7 +167,9 @@ Starting with a config hashref of:
     'OtherPlug:attr => '0'
   }
 
-Passing a plugin instance of C<'APlug'> would return:
+Passing a plugin instance of C<'APlug'>
+(or an arrayref of C<< ['APlug', 'Full::Package::APlug', {}] >>)
+would return:
 
   {
     'attr1'   => 'value1',
@@ -293,6 +295,7 @@ Used by other methods to normalize the information about a plugin.
 Returns a list of C<< ($name, $package, \%config) >>.
 
 If C<$plugin> is an arrayref it will simply dereference it.
+This can be useful for processing the results of plugin bundles.
 
 If C<$plugin> is an instance of a plugin that has a C<plugin_name>
 method it will construct the list from that method, C<ref>,
