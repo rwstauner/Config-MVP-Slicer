@@ -63,6 +63,12 @@ to the plugin's package (class).
 
 The default returns true if the two values are equal and false otherwise.
 
+If you want to match by package rather than name
+and you expand packages with (for example) a string prefix
+you may need to set this to something like:
+
+  match_package => sub { rewrite_prefix($_[0]) eq $_[1] }
+
 =cut
 
 has match_package => (
