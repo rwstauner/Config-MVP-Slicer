@@ -359,11 +359,22 @@ my ($parent, $plugin);
     config => $parent->config,
   });
 
+  # extract a hashref from the parent config without modifying the plugin
   my $plugin_config = $slicer->slice($plugin);
+
+  # from plugin bundles:
+  my $plugin_spec = ['Name', 'Package::Name', {default => 'config'}];
+  # update the hashref
+  $slicer->merge($plugin_spec);
+
+  # with object instances:
+  my $plugger = App::Plugin::Plugger->new({some => 'config'});
+  # update 'rw' attributes
+  $slicer->merge($plugger);
 
 =head1 DESCRIPTION
 
-This can be used to separate embedded configurations for other plugins
+This can be used to extract embedded configurations for other plugins
 out of larger (parent) configurations.
 
 A prime example of this would be
@@ -372,7 +383,7 @@ L<Dist::Zilla Plugin Bundles|Dist::Zilla::Role::PluginBundle>.
 A bundle loads other plugins with a default configuration
 that works most of the time, but sometimes you wish you could
 customize the configuration for one of those plugins
-without having the remove the plugin from the bundle
+without having to remove the plugin from the bundle
 and re-specify it separately.
 
   # dist.ini
