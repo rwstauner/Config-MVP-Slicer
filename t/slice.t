@@ -10,6 +10,9 @@ my $slicer = new_ok($mod, [{
     opt                 => 'main config val',
     'Plug.attr'         => 'pa',
     'Mod::Name.opt'     => 'val',
+    'Loco.cookie[]'     => 'snicker',
+    'X::Crazy.cookie[]' => 'doodle',
+    'Crazy.frosting'    => 'cupcake',
     'Moose.and[]'       => 'squirrel',
     'Hunting.season[0]' => 'duck',
     'Hunting.season[1]' => 'wabbit',
@@ -35,6 +38,21 @@ is_deeply
   'matches on class name';
 
 is_deeply $previous, { unused => 'config' }, 'slice leaves conf untouched';
+
+is_deeply
+  $slicer->slice([Loco => 'X::Crazy' => $previous ]),
+  { cookie => [qw(snicker doodle)] },
+  'matches on package and class name (merges array)';
+
+is_deeply
+  $slicer->slice([AnyCrazy => 'X::Crazy' => $previous ]),
+  { cookie => ['doodle'] },
+  'matches on package without class name';
+
+is_deeply
+  $slicer->slice([Crazy => 'X::Crazy' => $previous ]),
+  { frosting => 'cupcake', cookie => ['doodle'] },
+  'matches on package and class name (merges hash)';
 
 is_deeply
   $slicer->slice([Moose => Moose => {}]),
