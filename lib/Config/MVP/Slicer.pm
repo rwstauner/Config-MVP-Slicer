@@ -49,7 +49,7 @@ then it is required to be there for the default sub to match
   $slicer->match_name("Foo", "@Bar/Foo");       # true
   $slicer->match_name("Foo", "Bar");            # false
 
-  # configuration line: "@B/Foo.attr = value"
+  # configuration line: "@Bar/Foo.attr = value"
 
   $slicer->match_name("@Bar/Foo", "Foo");           # false
   $slicer->match_name("@Bar/Foo", "@Bar/Foo");      # true
