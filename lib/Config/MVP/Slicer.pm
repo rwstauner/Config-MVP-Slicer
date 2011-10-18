@@ -108,7 +108,9 @@ before the module name and attribute:
   # prefix => 'dynamic\.'
   # { 'dynamic.Module::Name.attr' => 'value' }
 
-Default is no prefix (empty string C<''>).
+This can be a string or a compiled regular expression (C<qr//>).
+
+The default is no prefix (empty string C<''>).
 
 =cut
 
