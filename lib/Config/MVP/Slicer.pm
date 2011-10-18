@@ -56,20 +56,8 @@ then it is required to be there for the default sub to match
   $slicer->match_name("@Bar/Foo", "@Baz/@Bar/Foo"); # true
   $slicer->match_name("@Bar/Foo", "@Baz/Foo");      # false
 
-=cut
-
-has match_name => (
-  is       => 'bare',
-  isa      => 'CodeRef',
-  traits   => ['Code'],
-  default  => sub {
-    # "@Bundle/Plugin" =~ "(@Bundle/)*Plugin"
-    sub { scalar $_[1] =~ m{^(@.+?/)*?\Q$_[0]\E$} }
-  },
-  handles => {
-    match_name => 'execute',
-  },
-);
+Subclasses can define C<_build_match_name>
+(which should return a C<sub>) to overwrite the default.
 
 =attr match_package
 
@@ -85,19 +73,32 @@ you may need to set this to something like:
 
   match_package => sub { rewrite_prefix($_[0]) eq $_[1] }
 
+Subclasses can define C<_build_match_package>
+(which should return a C<sub>) to overwrite the default.
+
 =cut
 
-has match_package => (
-  is       => 'bare',
-  isa      => 'CodeRef',
-  traits   => ['Code'],
-  default  => sub {
-    sub { $_[0] eq $_[1] }
-  },
-  handles => {
-    match_package => 'execute',
-  },
-);
+sub _build_match_name {
+  # "@Bundle/Plugin" =~ "(@Bundle/)*Plugin"
+  return sub { scalar $_[1] =~ m{^(@.+?/)*?\Q$_[0]\E$} };
+}
+
+sub _build_match_package {
+  return sub { $_[0] eq $_[1] };
+}
+
+foreach my $which ( qw( name package ) ) {
+  my $name = "match_$which";
+  has $name => (
+    is       => 'bare',
+    isa      => 'CodeRef',
+    traits   => ['Code'],
+    builder  => "_build_$name",
+    handles => {
+      $name => 'execute',
+    },
+  );
+}
 
 =attr prefix
 
