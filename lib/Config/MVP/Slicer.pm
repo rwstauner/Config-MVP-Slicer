@@ -430,7 +430,7 @@ You can help out by specifying that an attribute should be an array:
 
 This is required because each line will end up in a hashref:
 
-  { "quux[0]" => "part 1", "quxx[1]" => part 2 }
+  { "quux[0]" => "part 1", "quxx[1]" => "part 2" }
 
 The subscripts inside the brackets are used for sorting but otherwise ignored.
 The L</slice> method will sort the keys (B<alphabetically>) to produce:
