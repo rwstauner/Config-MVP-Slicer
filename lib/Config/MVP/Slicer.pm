@@ -392,7 +392,7 @@ bundle config and separate them out using this module.
 
 =head1 CONFIGURATION SYNTAX
 
-Often configurations come from an ini file and look like this:
+Often configurations come from an C<ini> file and look like this:
 
   [PluginName]
   option = value
@@ -409,7 +409,7 @@ To embed configuration for other plugins:
 
 The simple 'bundle_option' attribute is for C<@BigBundle>,
 and the bundle can slice out the C<Bundled::Plugin> configuration
-and merge it in.
+and merge it in to that plugin's configuration.
 
 Prefixes can be used (see L</prefix>).
 In this example the prefix is set as C<"plug.">.
@@ -426,11 +426,11 @@ You can help out by specifying that an attribute should be an array:
   Baz.quux[0] = part 1
   Baz.quux[1] = part 2
 
-The subscripts inside the brackets are used for sorting but otherwise ignored.
 This is required because each line will end up in a hashref:
 
   { "quux[0]" => "part 1", "quxx[1]" => part 2 }
 
+The subscripts inside the brackets are used for sorting but otherwise ignored.
 The L</slice> method will sort the keys (B<alphabetically>) to produce:
 
   { quux => ["part 1", "part 2"] }
