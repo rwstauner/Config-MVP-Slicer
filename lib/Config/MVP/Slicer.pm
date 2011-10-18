@@ -114,7 +114,7 @@ Default is no prefix (empty string C<''>).
 
 has prefix => (
   is       => 'ro',
-  isa      => 'Str',
+  isa      => 'RegexpRef | Str',
   default  => '',
 );
 

@@ -71,7 +71,7 @@ is_deeply
   [qw(Class::Name attr), undef],
   'alternate separator';
 
-$regexp = new_ok($mod, [{prefix => 'foo:', separator => '(.+?)\W+(\w+)'}])->separator_regexp;
+$regexp = new_ok($mod, [{prefix => qr/foo./, separator => '(.+?)\W+(\w+)'}])->separator_regexp;
 
 is_deeply
   [  'foo:Class::Name->attr' =~ $regexp],
