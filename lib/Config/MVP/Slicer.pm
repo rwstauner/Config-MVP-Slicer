@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 package Config::MVP::Slicer;
-# ABSTRACT: Separate embedded plugin config from parent config
+# ABSTRACT: Extract embedded plugin config from parent config
 
 use Carp (); # core
 use Moose;
