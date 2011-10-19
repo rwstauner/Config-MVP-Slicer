@@ -344,9 +344,8 @@ sub _update_hash {
   }
 }
 
-# TODO: learn which of these are supposed to be here:
-__PACKAGE__->meta->make_immutable;
 no Moose;
+__PACKAGE__->meta->make_immutable;
 1;
 
 =for test_synopsis
