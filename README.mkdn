@@ -1,0 +1,335 @@
+# NAME
+
+Config::MVP::Slicer - Extract embedded plugin config from parent config
+
+# VERSION
+
+version 0.301
+
+# SYNOPSIS
+
+    my $slicer = Config::MVP::Slicer->new({
+      config => $parent->config,
+    });
+
+    # extract a hashref from the parent config without modifying the plugin
+    my $plugin_config = $slicer->slice($plugin);
+
+    # from plugin bundles:
+    my $plugin_spec = ['Name', 'Package::Name', {default => 'config'}];
+    # update the hashref
+    $slicer->merge($plugin_spec);
+
+    # with object instances:
+    my $plugger = App::Plugin::Plugger->new({some => 'config'});
+    # update 'rw' attributes
+    $slicer->merge($plugger);
+
+# DESCRIPTION
+
+This can be used to extract embedded configurations for other plugins
+out of larger (parent) configurations.
+
+A example where this can be useful is plugin bundles
+(see [Config::MVP::Assembler::WithBundles](http://search.cpan.org/perldoc?Config::MVP::Assembler::WithBundles)).
+
+A bundle loads other plugins with a default configuration
+that works most of the time, but sometimes you wish you could
+customize the configuration for one of those plugins
+without having to remove the plugin from the bundle
+and re-specify it separately.
+
+    # mvp config file
+    [@MyBundle]
+    Other::Plugin.setting = new value
+
+Now you can accept customizations to plugins into your
+bundle config and separate them out using this module.
+
+# ATTRIBUTES
+
+## config
+
+This is the main/parent configuration hashref
+that contains embedded plugin configurations.
+
+## match_name
+
+This is coderef that determines if a configuration line
+matches a plugin's name.
+
+It can be customized by passing an alternate subroutine reference
+to the constructor.
+
+The sub will receive two arguments:
+
+- The plugin name portion of the configuration line
+- The name of the plugin being worked on (provided to ["slice"](#slice), for instance).
+
+The default returns true if the current plugin name matches
+the name from the config line
+regardless of any leading "@Bundle/" prefixes in the plugin name
+(as this is a common convention for bundles).
+
+Obviously if the "@Bundle/" prefix is specified in the configuration
+then it is required to be there for the default sub to match
+(but multiple other "@Bundle/" prefixes will be allowed before it).
+
+    # configuration line: "Foo.attr = value"
+
+    $slicer->match_name("Foo", "Foo");            # true
+    $slicer->match_name("Foo", "@Bar/Foo");       # true
+    $slicer->match_name("Foo", "Bar");            # false
+
+    # configuration line: "@Bar/Foo.attr = value"
+
+    $slicer->match_name("@Bar/Foo", "Foo");           # false
+    $slicer->match_name("@Bar/Foo", "@Bar/Foo");      # true
+    $slicer->match_name("@Bar/Foo", "@Baz/@Bar/Foo"); # true
+    $slicer->match_name("@Bar/Foo", "@Baz/Foo");      # false
+
+Subclasses can define `_build_match_name`
+(which should return a `sub`) to overwrite the default.
+
+## match_package
+
+This works like ["match_name"](#match_name)
+except that the configuration line is compared
+to the plugin's package (class).
+
+The default returns true if the two values are equal and false otherwise.
+
+If you want to match by package rather than name
+and you expand packages with (for example) a string prefix
+you may need to set this to something like:
+
+    match_package => sub { rewrite_prefix($_[0]) eq $_[1] }
+
+Subclasses can define `_build_match_package`
+(which should return a `sub`) to overwrite the default.
+
+## prefix
+
+Regular expression that should match at the beginning of a key
+before the module name and attribute:
+
+    # prefix => 'dynamic\.'
+    # { 'dynamic.Module::Name.attr' => 'value' }
+
+This can be a string or a compiled regular expression (`qr//`).
+
+The default is no prefix (empty string `''`).
+
+## separator
+
+A regular expression that will capture
+the package name in `$1` and
+the attribute name in `$2`.
+
+The default separates plugin name from attribute name with a dot:
+
+    'Module::Name.attribute'
+    '-Plugin.attr'
+
+# METHODS
+
+## separator_regexp
+
+Returns a compiled regular expression (`qr//`)
+combining ["prefix"](#prefix), ["separator"](#separator),
+and the possible trailing array specification (`\[.*?\]`).
+
+## slice
+
+    $slicer->slice($plugin);
+
+Return a hashref of the config arguments for the plugin
+determined by `$plugin`.
+
+This is a slice of the ["config"](#config) attribute
+appropriate for the plugin passed to the method.
+
+Starting with a config hashref of:
+
+    {
+      'APlug:attr1'   => 'value1',
+      'APlug:second'  => '2nd',
+      'OtherPlug:attr => '0'
+    }
+
+Passing a plugin instance of `'APlug'`
+(or an arrayref of `['APlug', 'Full::Package::APlug', {}]`)
+would return:
+
+    {
+      'attr1'   => 'value1',
+      'second'  => '2nd'
+    }
+
+## merge
+
+    $slicer->merge($plugin, \%opts);
+
+Get the config slice (see ["slice"](#slice)),
+then attempt to merge it into the plugin.
+
+If `$plugin` is an arrayref the hashref will be modified.
+If it is an object it's attributes should be writable (`'rw'`).
+
+This will append to array references
+if it was specified as an array
+or if a preexisting value is an arrayref.
+
+Returns the modified `$plugin` for convenience.
+
+Possible options:
+
+- `slice` - A hashref like that returned from ["slice"](#slice).  If not present, ["slice"](#slice) will be called.
+
+## plugin_info
+
+    $slicer->plugin_info($plugin);
+
+Used by other methods to normalize the information about a plugin.
+Returns a list of `($name, $package, \%config)`.
+
+If `$plugin` is an arrayref it will simply dereference it.
+This can be useful for processing the results of plugin bundles.
+
+If `$plugin` is an instance of a plugin that has a `plugin_name`
+method it will construct the list from that method, `ref`,
+and the instance itself.
+
+# CONFIGURATION SYNTAX
+
+Often configurations come from an `ini` file and look like this:
+
+    [PluginName]
+    option = value
+
+This gets converted to a hashref:
+
+    PluginName->new({ option => 'value' });
+
+To embed configuration for other plugins:
+
+    [@BigBundle]
+    bundle_option = value
+    Bundled::Plugin.option = other value
+
+The simple 'bundle_option' attribute is for `@BigBundle`,
+and the bundle can slice out the `Bundled::Plugin` configuration
+and merge it in to that plugin's configuration.
+
+Prefixes can be used (see ["prefix"](#prefix)).
+In this example the prefix is set as `"plug."`.
+
+    [@Foo]
+    plug.Bundled::Plugin.attr = value
+
+Due to limitations of this dynamic passing of unknown options
+(otherwise known as a _hack_)
+values that are arrays cannot be declared ahead of time by the bundle.
+You can help out by specifying that an attribute should be an array:
+
+    [@Bar]
+    Baz.quux[0] = part 1
+    Baz.quux[1] = part 2
+
+This is required because each line will end up in a hashref:
+
+    { "quux[0]" => "part 1", "quxx[1]" => "part 2" }
+
+The subscripts inside the brackets are used for sorting but otherwise ignored.
+The ["slice"](#slice) method will sort the keys (__alphabetically__) to produce:
+
+    { quux => ["part 1", "part 2"] }
+
+For simplicity the keys are sorted __alphabetically__
+because `quux[1.9]` and `quux[1.10]`
+probably won't sort the way you intended anyway,
+so just keep things simple:
+
+    [@Bundle]
+    Plug.attr[0] = part 1
+    Plug.attr[1] = part 2
+    Plug.other[09] = part 1
+    Plug.other[10] = part 2
+    Plug.alpha[a] = part 1
+    Plug.alpha[b] = part 2
+    Plug.alpha[bc] = part 3
+    Plug.single[] = subscript not required; only used for sorting
+
+# SUPPORT
+
+## Perldoc
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Config::MVP::Slicer
+
+## Websites
+
+The following websites have more information about this module, and may be of help to you. As always,
+in addition to those websites please use your favorite search engine to discover more resources.
+
+- Search CPAN
+
+The default CPAN search engine, useful to view POD in HTML format.
+
+[http://search.cpan.org/dist/Config-MVP-Slicer](http://search.cpan.org/dist/Config-MVP-Slicer)
+
+- RT: CPAN's Bug Tracker
+
+The RT ( Request Tracker ) website is the default bug/issue tracking system for CPAN.
+
+[http://rt.cpan.org/NoAuth/Bugs.html?Dist=Config-MVP-Slicer](http://rt.cpan.org/NoAuth/Bugs.html?Dist=Config-MVP-Slicer)
+
+- CPAN Ratings
+
+The CPAN Ratings is a website that allows community ratings and reviews of Perl modules.
+
+[http://cpanratings.perl.org/d/Config-MVP-Slicer](http://cpanratings.perl.org/d/Config-MVP-Slicer)
+
+- CPAN Testers
+
+The CPAN Testers is a network of smokers who run automated tests on uploaded CPAN distributions.
+
+[http://www.cpantesters.org/distro/C/Config-MVP-Slicer](http://www.cpantesters.org/distro/C/Config-MVP-Slicer)
+
+- CPAN Testers Matrix
+
+The CPAN Testers Matrix is a website that provides a visual overview of the test results for a distribution on various Perls/platforms.
+
+[http://matrix.cpantesters.org/?dist=Config-MVP-Slicer](http://matrix.cpantesters.org/?dist=Config-MVP-Slicer)
+
+- CPAN Testers Dependencies
+
+The CPAN Testers Dependencies is a website that shows a chart of the test results of all dependencies for a distribution.
+
+[http://deps.cpantesters.org/?module=Config::MVP::Slicer](http://deps.cpantesters.org/?module=Config::MVP::Slicer)
+
+## Bugs / Feature Requests
+
+Please report any bugs or feature requests by email to `bug-config-mvp-slicer at rt.cpan.org`, or through
+the web interface at [http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Config-MVP-Slicer](http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Config-MVP-Slicer). You will be automatically notified of any
+progress on the request by the system.
+
+## Source Code
+
+
+
+[https://github.com/rwstauner/Config-MVP-Slicer](https://github.com/rwstauner/Config-MVP-Slicer)
+
+    git clone https://github.com/rwstauner/Config-MVP-Slicer.git
+
+# AUTHOR
+
+Randy Stauner <rwstauner@cpan.org>
+
+# COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2011 by Randy Stauner.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
