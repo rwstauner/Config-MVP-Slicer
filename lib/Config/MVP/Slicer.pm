@@ -126,10 +126,17 @@ A regular expression that will capture
 the package name in C<$1> and
 the attribute name in C<$2>.
 
-The default separates plugin name from attribute name with a dot:
+The default (C<(.+?)\.(.+?)>)
+separates plugin name from attribute name with a dot:
 
   'Module::Name.attribute'
   '-Plugin.attr'
+
+B<NOTE>: The regexp should B<not> be anchored since L</separator_regexp>
+uses it as the middle piece of a larger regexp
+(to add L</prefix> and the possible array bracket suffix).
+Also beware of using a regexp that greedily matches the array bracket suffix
+as that can confuse things as well.
 
 =cut
 
