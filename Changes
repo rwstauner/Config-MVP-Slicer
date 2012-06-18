@@ -2,6 +2,8 @@ Revision history for Config-MVP-Slicer
 
 {{$NEXT}}
 
+0.302     2012-06-18T17:15:17Z
+
   [Documentation]
   - Add a warning to the Pod about using an anchored or overly greedy regexp
     for the 'separator' attribute (because it becomes part of a larger regexp).
