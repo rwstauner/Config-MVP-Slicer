@@ -1,6 +1,6 @@
 language: perl
 perl:
-  - "5.20"
+  - "5.24"
   - "5.18"
   - "5.8"
 
@@ -9,4 +9,5 @@ env:
     - COVERAGE=1
 
 before_install:
+  - '[ $TRAVIS_PERL_VERSION = 5.8 ] && unset COVERAGE || :'
   - eval $(curl https://travis-perl.github.io/init) --auto
