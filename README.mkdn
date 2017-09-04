@@ -1,10 +1,14 @@
+[![Build Status](https://travis-ci.org/rwstauner/Config-MVP-Slicer.svg?branch=master)](https://travis-ci.org/rwstauner/Config-MVP-Slicer)
+[![Coverage Status](https://coveralls.io/repos/rwstauner/Config-MVP-Slicer/badge.svg?branch=master)](https://coveralls.io/r/rwstauner/Config-MVP-Slicer?branch=master)
+[![Kwalitee status](http://cpants.cpanauthors.org/dist/Config-MVP-Slicer.png)](http://cpants.charsbar.org/dist/overview/Config-MVP-Slicer)
+
 # NAME
 
 Config::MVP::Slicer - Extract embedded plugin config from parent config
 
 # VERSION
 
-version 0.302
+version 0.303
 
 # SYNOPSIS
 
